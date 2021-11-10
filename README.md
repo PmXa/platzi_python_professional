@@ -196,6 +196,178 @@ Found 1 error in 1 file (checked 1 source file)
 
 ### Alcance de variables
 
+> 💡 Una variable sólo está disponible dentro de la región en la que fue creada.
+
+El *local scope* se refiere a variables que son creadas **dentro** de alguna función y, por l o tanto, sólo son accesibles en esa función. Por otra parte, el *global scope* permite que la variable sea accedida desde **cualquier punto** del programa. Por ejemplo:
+
+```python
+# Global scope
+x = "Global"
+
+# Local scope
+def my_fun():
+    x = "Local"
+    print(x)
+    
+my_fun() # "Local"
+print(x) # "Global"
+```
+
+> 💡 Aunque tengan el mismo nombre, distintos *scopes* se asignan a distintas variables.
+
+```python
+z = 5
+
+def my_func():
+	z = 3
+
+	def my_other_func():
+		z = 2
+		print(z)
+
+	my_other_func() # 2
+
+	print(z) # 3
+
+my_func()	# 2 y luego 3
+print(z)	# 5
+```
+
 ### Closures
 
+Un *closure* es una técnica en la cual se "recuerda" a una variable con un *scope* superior incluso si ese scope superior se elimina después (como con `del`). Requieren de:
+
+1. Una *nested function* (una función dentro de otra función).
+2. La nested function debe hacer referencia a una variable con scope superior.
+2. La función que envuelve a la función anidada debe retornar a esta función.
+
+Por ejemplo:
+
+```python
+def main():
+	a = 1
+	
+	def nested():	# Regla 1
+		print(a)	# Regla 2
+	
+	return nested	# Regla 3
+
+
+my_func = main()
+my_func() # 1
+del(main)
+my_func() # 1
+```
+
+> 💡 Los closures suelen ser temas de entrevistas de trabajo.
+
+Un ejemplo más complejo donde *recordemos* variables de scope superior sería el siguiente (típico de entrevistas):
+
+```python
+def make_multiplier(x):
+	
+	def multiplier(n):
+		return x * n
+	
+	return multiplier
+	
+times10 = make_multiplier(10)
+times4 = make_multiplier(4)
+
+print(times10(3))			# 30
+print(times4(5))			# 20
+print(times10(times4(2)))	# 80
+```
+
+Los closures suelen aparecer en dos escenarios principales:
+
+- Al tener una clase corta que tenga sólo un método (por elegancia 💅)
+- Al trabajar con (spoiler alert) [decoradores](#Decoradores 🎈).
+
 ### Decoradores 🎈
+
+Un decorador es una función que recibe como parámetro otra función (función de orden superior), le añade cosas y retorna una función diferente.
+
+> 💡 Un decorador es un closure especial.
+
+```python
+def decorador(func):
+	def wrapper():
+		print("Extra: esto no estaba en la función original 📰")
+		func()
+	return wrapper
+
+def saludo():
+	print("Hola!")   
+
+saludo() # Hola!
+
+saludo = decorador(saludo)
+saludo() 
+# Output:
+# Extra: esto no estaba en la función original 📰
+# Hola!
+```
+
+> 💡 Es común crear una función e inmediatamente después decorarla.
+
+Al ser tan común este patrón, en Python podemos hacerlo de una forma más rápida, bella y estética:
+
+```python
+def decorador(func):
+	def wrapper():
+		print("Extra: esto no estaba en la función original 📰")
+		func()
+	return wrapper
+
+@decorador
+def saludo():
+	print("Hola!")
+
+saludo()
+```
+
+> 💡 La *azúcar sintáctica* (sugar syntax) se refiere a un código embellecido para nosotros verlo de forma más estética.
+
+Para lograr que un decorador funcione con funciones que tengan o no parámetros sólo se debe anidar una función que reciba estos parámetros antes de la función que se quiere decorar. Por ejemplo:
+
+```python
+def with_custom_message(message):
+    def with_message(function):
+        print(f"{message}:")
+        def wrapper(*args, **kwargs):
+            function(*args, **kwargs)
+        return wrapper
+    return with_message
+
+
+@with_custom_message("Hello!")
+def int_multiply(a: int,b: int) -> int:
+    c: int = a * b
+    print(f"{a}×{b} = {c}")
+```
+
+> 💡 `*args` y `**kwargs` son una forma de recibir argumentos *posicionales* o nombrados, los haya o no
+
+Un uso práctico muy útil de decoradores es poder evaluar el tiempo de ejecución de una función:
+
+```python
+from datetime import datetime
+
+def execution_time(func):
+    def wrapper():
+        initial_time = datetime.now()
+        func()
+        final_time = datetime.now()
+        time_elapsed = final_time - initial_time
+        print(f"{time_elapsed.total_seconds()} seconds elapsed")
+    return wrapper
+
+
+@execution_time
+def random_func():
+    for _ in range(1_000_000):
+        pass
+
+random_func()
+```
