@@ -7,7 +7,9 @@ def log_to_file(mode: str = "w"):
     """
     def write_to_file(func):
         def wrapper(*args, **kwargs):
-            filename = time.strftime("%Y-%m-%d (%H:%M)")
+            f_name = func.__name__
+            date = time.strftime("%Y-%m-%d (%H:%M)")
+            filename = str(f_name) + " @ " + date
             with open(filename, mode, encoding="utf-8") as file:
                 result = func(*args, **kwargs)
                 file.write(str(result))
