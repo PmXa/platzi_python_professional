@@ -12,7 +12,8 @@ def log_to_file(mode: str = "w"):
             filename = str(f_name) + " @ " + date
             with open(filename, mode, encoding="utf-8") as file:
                 result = func(*args, **kwargs)
-                file.write(str(result))
+                log = str(result) + "\n"
+                file.write(log)
         return wrapper
     return write_to_file
 
