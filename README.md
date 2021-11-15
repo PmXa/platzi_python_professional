@@ -1,9 +1,8 @@
----
-Escuela: Programación y desarrollo de software
-Profesor: Facundo García Martoni
----
-
 # Curso profesional de Python
+
+<p style="text-align: right;">
+    <strong>Con: Facundo García Martoni</strong>
+</p>
 
 [TOC]
 
@@ -371,3 +370,220 @@ def random_func():
 
 random_func()
 ```
+
+## Estructuras de datos avanzadas
+
+### Iteradores 🔁
+
+Un *iterable* es cualquier objeto que podemos recorrer con un ciclo (listas, cadenas de caracteres, etc.). Cuando se hace un ciclo, Python no recorre el iterable como tal, sino que el iterable se convierte a un objeto especial: un *iterador*.
+
+Todo *iterable* se puede convertir en un *iterador* con la función `iter()` y, para recorrerlo se usa la función `next()`. Cuando se llega al último elemento y se usa `next()`, se eleva la excepción `StopIteration`:
+
+```python
+my_list = [4, 7, 17, 44, 57]
+my_iter = iter(my_list)
+
+# Barrido manual
+print(next(my_iter)) # 4
+print(next(my_iter)) # 7
+print(next(my_iter)) # 17
+
+# Barrido con ciclos
+while True:
+	try:
+		element = next(big_iter)
+		print(element)
+	except StopIteration:
+		break
+
+# Barrido con syntax sugar
+for element in my_list:
+	print(element)
+```
+
+> 💡 El ciclo `for` **no existe** dentro de Python; sólo es un alias para el ciclo `while` de un iterador.
+
+Para *construir* un iterador se debe armar una clase con dos métodos importandes:
+
+1. El *dunder iter* (`__iter__`)
+2. El *dunder next* (`__next__`)
+
+```python
+class EvenNumbers:
+    """ Iterador de:
+        (a) todos los números pares
+        (b) todos los números pares hasta un máximo
+    """
+
+    def __init__(self, max = None) -> None:
+        self.max = max
+
+    def __iter__(self):
+        self.num = 0
+        return self
+    
+    def __next__(self):
+        if not (self.max) or self.num <= self.max:
+            result = self.num
+            self.num += 2
+            return result
+        else:
+            raise StopIteration
+```
+
+> 💡 El método `__init__` sólo es necesario si se desea iniciar algún atributo junto con la instancia de la clase.
+
+La ventaja de usar iteradores incluye ahorrar recursos ya que son un símil de usar .svg vs. .jpg; es decir, almancenan *la fórmula de creación de elementos* en vez de *la lista de elementos* y, por lo mismo, son más rápidos.
+
+### Generadores
+
+Python entiende que usar iteradores es complejo: hay que hacer una clase con los métodos `__iter_` y `__next__`, usando atributos y el manejo de la excepción `StopIteration`, etc. Los *generadores* son, básicamente, *sugar syntax* de los iteradores.
+
+Cuando se ejecuta un `return`, una *función* termina, pero cuando se ejecuta un `yield`, la función retorna un valor y, si se vuelve a invocar, comienza desde donde se quedó, es decir, desde el último `yield`:
+
+```python
+def my_generator():
+	"""Ejemplo de un generador"""
+	
+	print("Hello, world!")
+	n = 0
+	yield n
+	
+	print("Hello, heaven!")
+	n = 1
+	yield n
+	
+	print("Hello, hell!")
+	n = 2
+	yield n
+
+x = my_generator # Instanciamos la clase
+
+print(next(x)) # Hello, world!
+print(next(x)) # Hello, heaven!
+print(next(x)) # Hello, hell!
+print(next(x)) # StopIteration
+```
+
+> 💡 Los generadores son funciones que guardan un estado.
+
+Así como hay *list* y *dict* comprehension, también hay *generator comprehension* simplemente usando `()`. La diferencia es que un *list comprehension* guarda **todos** los datos en memoria, mientras que un generador no, simplemente va *generando* cada dato conforme se necesite:
+
+```python
+my_list = [0,1,4,7,14,17,24,40,44,57]
+
+square_list = [x**2 for x in my_list]
+square_gen = (x**2 for x in my_list)
+```
+
+### Sets 🎾
+
+Los *sets* o *conjuntos* son una coleción inmutable y desordenada de elementos únicos. Son muy utilizados con bases de datos. Para crearlos, se usan llaves (`{}`) pero sin usar doble punto (`:`) o se haría un diccionario:
+
+```python
+my_set1 = {3, 4, 5}
+print("my_set1 = ", my_set1) # my_set1 = {3, 4, 5}
+
+my_set2 = {"Holi", 23.3, False, True}
+print("my_set2 = ", my_set2) # my_set2 = {False, True, 'Holi', 23.3}
+
+my_set3 = {3, 3, 2}
+print("my_set3 = ", my_set3) # my_set3 = {2, 3}
+
+my_set4 = {[1, 2, 3], 4}
+print("my_set4 = ", my_set4) # Error
+```
+
+> 💡 Python automáticamente elimina los elementos repetidos de un set.
+
+Para manipular sets y sus datos:
+
+- Podemos hacer type casting o crear uns et vacío con la función `set()`
+- Podemos añadir elementos con los método `add()` o `update()`
+- Podemos eliminar elementos con `discard()` o `remove()`
+- Podemos eliminar un elemento aleatorio del set con `pop()`
+- Podemos eliminar **todos** los elementos de un set con `clear()`
+
+```python
+# Casting de sets
+my_list = [1, 1, 4, 8, 14]
+my_set = set(my_list)
+print("my_set = ", my_set) # my_set =  {8, 1, 4, 14}
+
+# Creando un set vacío
+empty_set = set()
+
+# Añádiendo elementos al set vacío
+empty_set.add(1)
+print("empty_set = ", empty_set) # empty_set = {1}
+
+empty_set.update([1, 2, 3, 4])
+print("empty_set = ", empty_set) # empty_set = {1, 2, 3, 4}
+
+empty_set.update([1, 5, 6], {7, 8})
+print("empty_set = ", empty_set) # empty_set = {1, 2, 3, 4, 5, 6, 7, 8}
+
+# Eliminando elementos del set "vacío"
+empty_set.discard(7)
+print("empty_set = ", empty_set) # empty_set =  {1, 2, 3, 4, 5, 6, 8}
+
+empty_set.remove(8)
+print("empty_set = ", empty_set) # empty_set =  {1, 2, 3, 4, 5, 6}
+
+empty_set.discard(7) # Elemento inexistente
+print("empty_set = ", empty_set) # empty_set =  {1, 2, 3, 4, 5, 6}
+
+empty_set.remove(8) # Elemento inexistente
+print("empty_set = ", empty_set) # Error KeyError
+
+```
+
+> 💡 `discard()` permite "eliminar" un elemento inexistente, pero `remove()` elevará un error.
+
+#### Unión ($A \cup B$) 
+
+```python
+# Por operador
+union = set1 | set2
+
+#Por método
+union = set1.union(set2)
+```
+
+![Set union](https://upload.wikimedia.org/wikipedia/commons/thumb/3/32/SetUnion.svg/280px-SetUnion.svg.png)
+
+#### Intersección ($A \cap B$)
+
+```python
+# Por operador
+intersection = set1 & set2
+
+#Por método
+intersection = set1.intersection(set2)
+```
+
+![Set intersection](https://upload.wikimedia.org/wikipedia/commons/thumb/c/cb/SetIntersection.svg/280px-SetIntersection.svg.png)
+
+#### Diferencia ($A - B$)
+
+```python
+# Por operador
+difference = set1 - set2
+
+#Por método
+difference = set1.difference(set2)
+```
+
+![Set difference](https://upload.wikimedia.org/wikipedia/commons/thumb/e/ec/SetDifferenceA.svg/280px-SetDifferenceA.svg.png)
+
+#### Diferencia simétrica ($A \Delta B$)
+
+```python
+# Por operador
+symmetric_difference = set1 ^ set2
+
+#Por método
+symmetric_difference = set1.symmetric_difference(set2)
+```
+
+![img](https://upload.wikimedia.org/wikipedia/commons/thumb/f/f2/SetSymmetricDifference.svg/280px-SetSymmetricDifference.svg.png)
