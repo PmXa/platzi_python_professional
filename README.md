@@ -587,3 +587,61 @@ symmetric_difference = set1.symmetric_difference(set2)
 ```
 
 ![img](https://upload.wikimedia.org/wikipedia/commons/thumb/f/f2/SetSymmetricDifference.svg/280px-SetSymmetricDifference.svg.png)
+
+## Manejo de fechas 📆
+
+Hay muchos eventos para los cuales querríamos manejar fechas (cuando se crea un usuario, cuando se sube una foto, cuando se hace una experimento 👀) y, para eso, usamos el módulo `datetime`. Este módulo tiene la clase `datetime` con el método `now()` que puede
+
+- Devolver la fecha y hora de la computadora (si esta configurada) o
+- Devolver la fecha UTC si no (como en un servidor, por ejemplo)
+
+```python
+import datetime as dt
+
+# Manejo de fechas con hora
+
+# Manejo de sólo la fecha
+today = dt.date.today()
+year = today.year
+month = today.month
+day = today.day
+```
+
+> 💡 Es mejor usar `utcnow()` para usar la hora universal en equipos de trabajo internacionales.
+
+### Formato de fecha
+
+En EE. UU. el formato de fecha es mm/dd/yyyy (🙄), mientras que en latinoamérica es dd/mm/yyyy (😌). En Python podemos especificar cómo mostrar la fecha con el método `strftime()` mediante *placeholders*; [hay más en la documentación](https://docs.python.org/es/3/library/datetime.html#strftime-and-strptime-format-codes), pero estos son los más comunes:
+
+| Placeholder | Elemento |
+| :---------: | :------: |
+|    `%Y`     |   Año    |
+|    `%m`     |   Mes    |
+|    `%d`     |   Día    |
+|    `%H`     |   Hora   |
+|    `%M`     |  Minuto  |
+|    `%S`     | Segundo  |
+
+### Zonas horarias
+
+Para el manejo de zonas horarias existe el módulo `pytz` que usa la lista de zonas horarias:
+
+```python
+from datetime import datetime
+import pytz
+
+bogota_tz = pytz.timezone("America/Bogota")
+bogota_time = datetime.now(bogota_tz)
+
+mexico_tz = pytz.timezone("America/Mexico_City")
+mexico_time = datetime.now(mexico_tz)
+
+caracas_tz = pytz.timezone("America/Caracas")
+caracas_time = datetime.now(caracas_tz)
+
+print("CDMX: ", mexico_time.strftime("%d/%m/%Y %H:%M"))
+print("Bogotá: ", bogota_time.strftime("%d/%m/%Y %H:%M"))
+print("Caracas: ", caracas_time.strftime("%d/%m/%Y %H:%M"))
+```
+
+> 💡 El módulo `pytz` no viene con python y debe instalarse con pip.
